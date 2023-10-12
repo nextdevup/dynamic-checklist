@@ -17,13 +17,13 @@ const ChecklistToggle = props => {
     }
   }, /*#__PURE__*/_react.default.createElement(_FormControlLabel.default, {
     control: /*#__PURE__*/_react.default.createElement(_Checkbox.default, {
-      onChange: e => props.checkedHandler(e, props.SectionNameToDisplay),
+      onChange: e => props.checkedHandler(e, props.show),
       key: props.index
     }),
-    label: props.Label,
+    label: props.label,
     key: props.index + "label"
   }), props.TooltipText && /*#__PURE__*/_react.default.createElement(_Tooltip.default, {
-    title: props.TooltipText,
+    title: props.tooltipText,
     key: props.index + "Tooltip"
   }, /*#__PURE__*/_react.default.createElement(_Info.default, {
     fontSize: "small",

@@ -1,45 +1,75 @@
 import React, { useState } from "react";
-import ChecklistSection from "../Organisms/ChecklistSection";
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import Container from '@mui/material/Container';
+import Paper from '@mui/material/Paper';
+import Grid from '@mui/material/Grid';
+import ChecklistToggle from "../Molecules/ChecklistToggle";
 
 const ChecklistForm = (props) => {
-  const [data, setData] = useState([props.ChecklistData.find(section => section.SectionName === props.initialSectionName)]);
+  // If a checkbox doesn't have any tags, then it is not dependent on anything to be displayed
+  const [data, setData] = useState([props.ChecklistData.find(checkbox => !checkbox.tags)]);
+  const allTags = props.ChecklistData.map(checkbox => checkbox.tags).filter(tag => tag);
 
-  const checkedHandler = (event, sectionToToggle) => {
-    let sectionsToDisplay = [...data];
+  const onAutocompleteChange = (event, values, reason) => {
+    onChange(reason == 'selectOption', values);
+  }
 
-    if (event.target.checked && sectionToToggle) {
-      let sectionToAdd = props.ChecklistData.find(section => section.SectionName === sectionToToggle);
+  const checkedHandler = (event, tagsToToggle,) => {
+    onChange(event.target.checked, tagsToToggle);
+  }
 
-      if (sectionToAdd) {
-        sectionsToDisplay.push(sectionToAdd);
+  const onChange = (isChecked, tagsToToggle) => {
+    let checkboxesToDisplay = [...data];
+
+    if (isChecked && tagsToToggle) {
+      let checkboxesToAdd = props.ChecklistData.filter(checkbox => checkbox.tags && checkbox.tags.some(tag => tagsToToggle.includes(tag)));
+
+      if (checkboxesToAdd) {
+        checkboxesToDisplay.push(...checkboxesToAdd);
       }
-    } else {
+    } else if (tagsToToggle) {
       // Display sections that weren't toggled
-      sectionsToDisplay = sectionsToDisplay.filter(section => section.SectionName !== sectionToToggle);
+      checkboxesToDisplay = checkboxesToDisplay.filter(checkbox => !checkbox.tags || !checkbox.tags.some(tag => tagsToToggle.includes(tag)));
 
       // Display sections that are either the initial section or that still have their triggering section displaying
-      sectionsToDisplay = sectionsToDisplay.filter(section => section.SectionName === props.initialSectionName || 
-          sectionsToDisplay.some(function(sectionToCheckVisible) { 
-            return sectionToCheckVisible.Options.some(function(option) { 
-              return (option.SectionNameToDisplay && option.SectionNameToDisplay === section.SectionName)
-            }) 
-          })
-        );
+      checkboxesToDisplay = checkboxesToDisplay.filter(checkbox => !checkbox.tags || checkbox.tags.some(tag => tagsToToggle.includes(tag)));
     }
 
-    setData(sectionsToDisplay);
+    setData(checkboxesToDisplay);
+  }
+
+  const getSelectedTags = () => {
+    return data.filter(checkbox => checkbox.tags).map(checkbox => checkbox.tags);
   }
 
   return (
-    <div>
-      {data.map((section) => (
-        section && <ChecklistSection 
-        key={section.SectionName}
-        {...section}
-        checkedHandler={checkedHandler}
-      />
-      ))}
-    </div>
+    <>
+      <Container sx={{marginTop: '1%'}}>
+        <Autocomplete 
+          multiple
+          filterSelectedOptions
+          value={[getSelectedTags()]?.length > 0 ? getSelectedTags() : []}
+          options={allTags}
+          getOptionLabel={(option) => option}
+          renderInput={(params) => <TextField {...params} label="Search..." variant="outlined" />}
+          onChange={onAutocompleteChange}
+          id='tags-autocomplete' 
+          sx={{width: '50%', margin: 'auto'}}
+        />
+        {data &&
+          <Paper className="main-content" elevation={10} sx={{marginTop: '3%', minHeight: '30vh'}}>
+            <Grid container spacing={2} justifyContent="center" alignItems="center" direction="row">
+              {data.map((option, index) => (
+                <Grid item xs={3}>
+                  <ChecklistToggle {...option} index={index} key={index + "toggle"} checkedHandler={checkedHandler} />
+                </Grid>
+              ))}
+            </Grid>
+          </Paper>
+        }
+      </Container>
+    </>
   );
 };
 

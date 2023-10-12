@@ -11,16 +11,16 @@ const ChecklistToggle = (props) => {
         control={
           <Checkbox
             onChange={(e) =>
-              props.checkedHandler(e, props.SectionNameToDisplay)
+              props.checkedHandler(e, props.show)
             }
             key={props.index}
           />
         }
-        label={props.Label}
+        label={props.label}
         key={props.index + "label"}
       />
       {props.TooltipText && (
-        <Tooltip title={props.TooltipText} key={props.index + "Tooltip"}>
+        <Tooltip title={props.tooltipText} key={props.index + "Tooltip"}>
           <InfoIcon fontSize="small" key={props.index + "infoIcon"} />
         </Tooltip>
       )}
