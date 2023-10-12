@@ -11,7 +11,7 @@ In a React app, import the ChecklistForm components:
 
 Pass in the data for the component (see example below of the data file that can be used)
 
-`import data from "data-file.json";`
+`import data from "./data-file.json";`
 
 `<ChecklistForm ChecklistData={data} />`
 
