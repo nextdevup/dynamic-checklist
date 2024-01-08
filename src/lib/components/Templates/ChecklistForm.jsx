@@ -4,43 +4,54 @@ import Autocomplete from '@mui/material/Autocomplete';
 import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import ChecklistToggle from "../Molecules/ChecklistToggle";
+import ChecklistToggle from "./ChecklistToggle";
 
 const ChecklistForm = (props) => {
   // If a checkbox doesn't have any tags, then it is not dependent on anything to be displayed
   const [data, setData] = useState([props.ChecklistData.find(checkbox => !checkbox.tags)]);
-  const allTags = props.ChecklistData.map(checkbox => checkbox.tags).filter(tag => tag);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const allTags = props.ChecklistData.flatMap(checkbox => checkbox.tags).filter(tag => tag);
 
   const onAutocompleteChange = (event, values, reason) => {
-    onChange(reason == 'selectOption', values);
+    onChange(reason == 'selectOption', values, true);    
   }
 
   const checkedHandler = (event, tagsToToggle,) => {
     onChange(event.target.checked, tagsToToggle);
   }
 
-  const onChange = (isChecked, tagsToToggle) => {
-    let checkboxesToDisplay = [...data];
+  const onChange = (isChecked, tagsToToggle, fromAutoComplete = false) => {
+    let checkboxesToDisplay = [...props.ChecklistData];
+    let updatedSelectedTags = [];
+    console.log('isChecked: ' + isChecked + ' tagsToToggle: ' +  tagsToToggle);
 
-    if (isChecked && tagsToToggle) {
-      let checkboxesToAdd = props.ChecklistData.filter(checkbox => checkbox.tags && checkbox.tags.some(tag => tagsToToggle.includes(tag)));
-
-      if (checkboxesToAdd) {
-        checkboxesToDisplay.push(...checkboxesToAdd);
-      }
-    } else if (tagsToToggle) {
-      // Display sections that weren't toggled
-      checkboxesToDisplay = checkboxesToDisplay.filter(checkbox => !checkbox.tags || !checkbox.tags.some(tag => tagsToToggle.includes(tag)));
-
-      // Display sections that are either the initial section or that still have their triggering section displaying
-      checkboxesToDisplay = checkboxesToDisplay.filter(checkbox => !checkbox.tags || checkbox.tags.some(tag => tagsToToggle.includes(tag)));
+    if (fromAutoComplete) {
+        updatedSelectedTags = tagsToToggle ?? [];
+    } else if (tagsToToggle?.length) {
+        if (isChecked) {
+            updatedSelectedTags = Array.from(new Set([...selectedTags, ...tagsToToggle])) ?? [];
+        } else {
+            updatedSelectedTags = selectedTags.filter(tag => !tagsToToggle.includes(tag)) ?? [];
+        }
+    }
+    else {
+        return;
     }
 
-    setData(checkboxesToDisplay);
-  }
+    console.log('selectedTags: ' + updatedSelectedTags);
 
-  const getSelectedTags = () => {
-    return data.filter(checkbox => checkbox.tags).map(checkbox => checkbox.tags);
+    checkboxesToDisplay = checkboxesToDisplay.filter(checkbox => 
+        !checkbox.tags ||
+        (updatedSelectedTags.some(tag => 
+            checkbox.tags.includes(tag) ||
+            checkboxesToDisplay?.some(elem => 
+                elem.tags?.includes(tag) && elem.show?.some(show => checkbox.tags?.includes(show))
+            )
+        ))
+    );
+
+    setData(checkboxesToDisplay);
+    setSelectedTags(updatedSelectedTags);
   }
 
   return (
@@ -49,9 +60,10 @@ const ChecklistForm = (props) => {
         <Autocomplete 
           multiple
           filterSelectedOptions
-          value={[getSelectedTags()]?.length > 0 ? getSelectedTags() : []}
+          value={selectedTags ?? []}
           options={allTags}
-          getOptionLabel={(option) => option}
+          // isOptionEqualToValue has to be explicitly defined to compare without type matching
+          isOptionEqualToValue={(option, value) => option == value}
           renderInput={(params) => <TextField {...params} label="Search..." variant="outlined" />}
           onChange={onAutocompleteChange}
           id='tags-autocomplete' 
@@ -62,7 +74,8 @@ const ChecklistForm = (props) => {
             <Grid container spacing={2} justifyContent="center" alignItems="center" direction="row">
               {data.map((option, index) => (
                 <Grid item xs={3}>
-                  <ChecklistToggle {...option} index={index} key={index + "toggle"} checkedHandler={checkedHandler} />
+                  <ChecklistToggle {...option} index={index} key={index + "toggle"} checkedHandler={checkedHandler}
+                    tagSelected={option.show && option.show.filter(elem => selectedTags.includes(elem)).length} />
                 </Grid>
               ))}
             </Grid>

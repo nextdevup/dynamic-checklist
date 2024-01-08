@@ -17,6 +17,7 @@ const ChecklistToggle = props => {
     }
   }, /*#__PURE__*/_react.default.createElement(_FormControlLabel.default, {
     control: /*#__PURE__*/_react.default.createElement(_Checkbox.default, {
+      checked: props.tagSelected,
       onChange: e => props.checkedHandler(e, props.show),
       key: props.index
     }),

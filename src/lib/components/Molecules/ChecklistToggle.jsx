@@ -10,9 +10,10 @@ const ChecklistToggle = (props) => {
       <FormControlLabel
         control={
           <Checkbox
+            checked={props.tagSelected}
             onChange={(e) =>
               props.checkedHandler(e, props.show)
-            }
+            }            
             key={props.index}
           />
         }
