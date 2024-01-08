@@ -4,7 +4,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import ChecklistToggle from "./ChecklistToggle";
+import ChecklistToggle from "../Molecules/ChecklistToggle";
 
 const ChecklistForm = (props) => {
   // If a checkbox doesn't have any tags, then it is not dependent on anything to be displayed

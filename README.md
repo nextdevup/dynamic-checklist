@@ -7,7 +7,7 @@ Install using `npm install dynamic-checklist`
 ### Usage 
 
 In a React app, import the ChecklistForm components:  
-`import { ChecklistForm } from 'dynamic-checklist';`
+`import ChecklistForm from 'dynamic-checklist';`
 
 Pass in the data for the component (see example below of the data file that can be used)
 
