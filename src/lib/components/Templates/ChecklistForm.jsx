@@ -8,7 +8,7 @@ import ChecklistToggle from "../Molecules/ChecklistToggle";
 
 const ChecklistForm = (props) => {
   // If a checkbox doesn't have any tags, then it is not dependent on anything to be displayed
-  const [data, setData] = useState([props.ChecklistData.find(checkbox => !checkbox.tags)]);
+  const [data, setData] = useState(props.ChecklistData.filter(checkbox => !checkbox?.tags));
   const [selectedTags, setSelectedTags] = useState([]);
   const allTags = props.ChecklistData.flatMap(checkbox => checkbox.tags).filter(tag => tag);
 

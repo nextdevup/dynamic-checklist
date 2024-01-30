@@ -23,7 +23,7 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 const ChecklistForm = props => {
   // If a checkbox doesn't have any tags, then it is not dependent on anything to be displayed
-  const [data, setData] = (0, _react.useState)([props.ChecklistData.find(checkbox => !checkbox.tags)]);
+  const [data, setData] = (0, _react.useState)(props.ChecklistData.filter(checkbox => !(checkbox !== null && checkbox !== void 0 && checkbox.tags)));
   const [selectedTags, setSelectedTags] = (0, _react.useState)([]);
   const allTags = props.ChecklistData.flatMap(checkbox => checkbox.tags).filter(tag => tag);
   const onAutocompleteChange = (event, values, reason) => {
