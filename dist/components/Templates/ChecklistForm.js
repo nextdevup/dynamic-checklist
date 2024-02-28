@@ -25,22 +25,22 @@ const ChecklistForm = props => {
   // If a checkbox doesn't have any tags, then it is not dependent on anything to be displayed
   const [data, setData] = (0, _react.useState)(props.ChecklistData.filter(checkbox => !(checkbox !== null && checkbox !== void 0 && checkbox.tags)));
   const [selectedTags, setSelectedTags] = (0, _react.useState)([]);
-  const allTags = props.ChecklistData.flatMap(checkbox => checkbox.tags).filter(tag => tag);
+  const allTags = [...new Set(props.ChecklistData.flatMap(checkbox => checkbox.tags))];
   const onAutocompleteChange = (event, values, reason) => {
-    onChange(reason == 'selectOption', values, true);
+    onChange(reason == 'selectOption', values, true, false);
   };
-  const checkedHandler = (event, tagsToToggle) => {
-    onChange(event.target.checked, tagsToToggle);
+  const checkedHandler = (event, showProp) => {
+    onChange(event.target.checked, showProp, false, true);
   };
-  const onChange = function onChange(isChecked, tagsToToggle) {
+  const onChange = function onChange(isSelected, tagsToToggle) {
     let fromAutoComplete = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    let fromCheckbox = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
     let checkboxesToDisplay = [...props.ChecklistData];
     let updatedSelectedTags = [];
-    console.log('isChecked: ' + isChecked + ' tagsToToggle: ' + tagsToToggle);
     if (fromAutoComplete) {
       updatedSelectedTags = tagsToToggle !== null && tagsToToggle !== void 0 ? tagsToToggle : [];
     } else if (tagsToToggle !== null && tagsToToggle !== void 0 && tagsToToggle.length) {
-      if (isChecked) {
+      if (isSelected) {
         var _Array$from;
         updatedSelectedTags = (_Array$from = Array.from(new Set([...selectedTags, ...tagsToToggle]))) !== null && _Array$from !== void 0 ? _Array$from : [];
       } else {
@@ -50,17 +50,9 @@ const ChecklistForm = props => {
     } else {
       return;
     }
-    console.log('selectedTags: ' + updatedSelectedTags);
-    checkboxesToDisplay = checkboxesToDisplay.filter(checkbox => !checkbox.tags || updatedSelectedTags.some(tag => {
-      var _checkboxesToDisplay;
-      return checkbox.tags.includes(tag) || ((_checkboxesToDisplay = checkboxesToDisplay) === null || _checkboxesToDisplay === void 0 ? void 0 : _checkboxesToDisplay.some(elem => {
-        var _elem$tags, _elem$show;
-        return ((_elem$tags = elem.tags) === null || _elem$tags === void 0 ? void 0 : _elem$tags.includes(tag)) && ((_elem$show = elem.show) === null || _elem$show === void 0 ? void 0 : _elem$show.some(show => {
-          var _checkbox$tags;
-          return (_checkbox$tags = checkbox.tags) === null || _checkbox$tags === void 0 ? void 0 : _checkbox$tags.includes(show);
-        }));
-      }));
-    }));
+    checkboxesToDisplay = checkboxesToDisplay.filter(checkbox => {
+      return !checkbox.tags || updatedSelectedTags.some(tag => checkbox.tags.includes(tag));
+    });
     setData(checkboxesToDisplay);
     setSelectedTags(updatedSelectedTags);
   };
@@ -72,7 +64,8 @@ const ChecklistForm = props => {
     multiple: true,
     filterSelectedOptions: true,
     value: selectedTags !== null && selectedTags !== void 0 ? selectedTags : [],
-    options: allTags
+    options: allTags,
+    getOptionLabel: option => option
     // isOptionEqualToValue has to be explicitly defined to compare without type matching
     ,
     isOptionEqualToValue: (option, value) => option == value,

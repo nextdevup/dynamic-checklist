@@ -10,25 +10,24 @@ const ChecklistForm = (props) => {
   // If a checkbox doesn't have any tags, then it is not dependent on anything to be displayed
   const [data, setData] = useState(props.ChecklistData.filter(checkbox => !checkbox?.tags));
   const [selectedTags, setSelectedTags] = useState([]);
-  const allTags = props.ChecklistData.flatMap(checkbox => checkbox.tags).filter(tag => tag);
+  const allTags = [...new Set(props.ChecklistData.flatMap(checkbox => checkbox.tags))];
 
   const onAutocompleteChange = (event, values, reason) => {
-    onChange(reason == 'selectOption', values, true);    
+    onChange(reason == 'selectOption', values, true, false);    
   }
 
-  const checkedHandler = (event, tagsToToggle,) => {
-    onChange(event.target.checked, tagsToToggle);
+  const checkedHandler = (event, showProp) => {
+    onChange(event.target.checked, showProp, false, true);
   }
 
-  const onChange = (isChecked, tagsToToggle, fromAutoComplete = false) => {
+  const onChange = (isSelected, tagsToToggle, fromAutoComplete = false, fromCheckbox = false) => {
     let checkboxesToDisplay = [...props.ChecklistData];
     let updatedSelectedTags = [];
-    console.log('isChecked: ' + isChecked + ' tagsToToggle: ' +  tagsToToggle);
 
     if (fromAutoComplete) {
         updatedSelectedTags = tagsToToggle ?? [];
     } else if (tagsToToggle?.length) {
-        if (isChecked) {
+        if (isSelected) {
             updatedSelectedTags = Array.from(new Set([...selectedTags, ...tagsToToggle])) ?? [];
         } else {
             updatedSelectedTags = selectedTags.filter(tag => !tagsToToggle.includes(tag)) ?? [];
@@ -38,17 +37,10 @@ const ChecklistForm = (props) => {
         return;
     }
 
-    console.log('selectedTags: ' + updatedSelectedTags);
-
-    checkboxesToDisplay = checkboxesToDisplay.filter(checkbox => 
-        !checkbox.tags ||
-        (updatedSelectedTags.some(tag => 
-            checkbox.tags.includes(tag) ||
-            checkboxesToDisplay?.some(elem => 
-                elem.tags?.includes(tag) && elem.show?.some(show => checkbox.tags?.includes(show))
-            )
-        ))
-    );
+    checkboxesToDisplay = checkboxesToDisplay.filter(checkbox => {
+      return !checkbox.tags ||
+        updatedSelectedTags.some(tag => checkbox.tags.includes(tag))
+    });
 
     setData(checkboxesToDisplay);
     setSelectedTags(updatedSelectedTags);
@@ -62,6 +54,7 @@ const ChecklistForm = (props) => {
           filterSelectedOptions
           value={selectedTags ?? []}
           options={allTags}
+          getOptionLabel={(option) => option}
           // isOptionEqualToValue has to be explicitly defined to compare without type matching
           isOptionEqualToValue={(option, value) => option == value}
           renderInput={(params) => <TextField {...params} label="Search..." variant="outlined" />}
