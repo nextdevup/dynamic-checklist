@@ -61,9 +61,12 @@ const ChecklistForm = (props) => {
 
   const removeNegativeIndexes = (arr) => {
     let negativeIndex = arr.indexOf(-1);
-
-    if (negativeIndex !== -1) {
-      arr[negativeIndex] = Infinity;
+  
+    while (negativeIndex !== -1) {
+      if (negativeIndex !== -1) {
+        arr[negativeIndex] = Infinity;
+      }
+      negativeIndex = arr.indexOf(-1);
     }
   }
 
