@@ -78,8 +78,11 @@ const ChecklistForm = props => {
   };
   const removeNegativeIndexes = arr => {
     let negativeIndex = arr.indexOf(-1);
-    if (negativeIndex !== -1) {
-      arr[negativeIndex] = Infinity;
+    while (negativeIndex !== -1) {
+      if (negativeIndex !== -1) {
+        arr[negativeIndex] = Infinity;
+      }
+      negativeIndex = arr.indexOf(-1);
     }
   };
   return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_Container.default, {
